@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 10,
+	"VersionName": "0.1.0",
+	"FriendlyName": "Google Test for UE",
+	"Description": "Google Test runner for Unreal Engine",
+	"Category": "Testing",
+	"CreatedBy": "Jordi Guerrero",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "https://github.com/JordiGR/GoogleTestForUnrealEngine",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "GoogleTestForUE",
+			"Type": "Developer",
+			"LoadingPhase": "Default"
+		}
+	]
+}
