@@ -19,27 +19,24 @@
 
 #include <SharedPointer.h>
 #include <UICommandList.h>
-#include <LevelEditor.h>	//jjj
+#include <LevelEditor.h>
 #include <Framework/MultiBox/MultiBoxBuilder.h>
 #include "GoogleTestForUEToolbarStyle.h"
 #include "GoogleTestForUECommands.h"
-#include "LogStream.h"
+#include "GoogleTestOutputLogRedirector.h"
 
 
 namespace
 {
 	const FName GoogleTestForUEToolbarTabName("GoogleTestForUEToolbar");
 
-	void InitialiseGoogleTest();
+	void RunGoogleTests();
 	void AddMenuCommand(
 		TSharedPtr<class FUICommandList> commands, IHasMenuExtensibility& module,
 		TSharedPtr<FUICommandInfo> commandInfo, const FName& menuName, EExtensionHook::Position position);
 	void AddToolbarButton(
 		TSharedPtr<class FUICommandList> commands, IHasToolBarExtensibility& module,
 		TSharedPtr<FUICommandInfo> commandInfo, const FName& toolbarName, EExtensionHook::Position position);
-	/*jjj	void AddMenuExtension(FMenuBuilder& Builder);
-	void AddToolbarExtension(FToolBarBuilder& Builder);
-	*/
 }
 
 
@@ -48,7 +45,8 @@ namespace
 
 void FGoogleTestForUEModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin
+	// file per-module
 	InitialiseGoogleTest();
 
 	FGoogleTestForUEToolbarStyle::Initialize();
@@ -73,8 +71,8 @@ void FGoogleTestForUEModule::StartupModule()
 
 void FGoogleTestForUEModule::ShutdownModule()
 {
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
+	// This function may be called during shutdown to clean up your module.
+	// For modules that support dynamic reloading, we call this function before unloading the module.
 
 	FGoogleTestForUEToolbarStyle::Shutdown();
 
@@ -83,17 +81,35 @@ void FGoogleTestForUEModule::ShutdownModule()
 
 void FGoogleTestForUEModule::PluginButtonClicked()
 {
-	LogStream stream;
+	RunGoogleTests();
+}
 
-	auto previousStream = std::cout.rdbuf(&stream);
+void FGoogleTestForUEModule::InitialiseGoogleTest()
+{
+	using StringPtr = char*;
+	auto argc = 1;
+	StringPtr* argv = new StringPtr[argc];
+	char* emptyString = "";
 
-	printf("********** PrintF redirected\n");
-	std::cout << "********** cout redirected" << std::endl;
+	argv[0] = emptyString;
 
-	RUN_ALL_TESTS();
+	::testing::InitGoogleTest(&argc, argv);
 
-	std::cout << std::endl;
-	std::cout.rdbuf(previousStream);
+	delete[] argv;
+
+	RedirectGoogleTestOutput();
+}
+
+void FGoogleTestForUEModule::RedirectGoogleTestOutput()
+{
+	if (m_GoogleTestEventListener == nullptr)
+	{
+		m_GoogleTestEventListener = new GoogleTestOutputLogRedirector;
+		auto& listeners = ::testing::UnitTest::GetInstance()->listeners();
+
+		delete listeners.Release(listeners.default_result_printer());
+		listeners.Append(m_GoogleTestEventListener);
+	}
 }
 
 #undef LOCTEXT_NAMESPACE
@@ -103,18 +119,9 @@ IMPLEMENT_MODULE(FGoogleTestForUEModule, GoogleTestForUE)
 
 namespace
 {
-	void InitialiseGoogleTest()
+	void RunGoogleTests()
 	{
-		using StringPtr = char*;
-		auto argc = 1;
-		StringPtr* argv = new StringPtr[argc];
-		char* emptyString = "";
-
-		argv[0] = emptyString;
-
-		::testing::InitGoogleTest(&argc, argv);
-
-		delete[] argv;
+		RUN_ALL_TESTS();
 	}
 
 	void AddMenuCommand(
@@ -125,7 +132,6 @@ namespace
 
 		MenuExtender->AddMenuExtension(
 			menuName, position, commands,
-			//jjj	FMenuExtensionDelegate::CreateRaw(this, &FGoogleTestForUEModule::AddMenuExtension));
 			FMenuExtensionDelegate::CreateLambda(
 				[commandInfo](FMenuBuilder& builder)
 				{
@@ -142,7 +148,6 @@ namespace
 		TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender);
 		ToolbarExtender->AddToolBarExtension(
 			toolbarName, position, commands,
-			//jjj	FToolBarExtensionDelegate::CreateRaw(this, &FGoogleTestForUEModule::AddToolbarExtension));
 			FToolBarExtensionDelegate::CreateLambda(
 				[commandInfo](FToolBarBuilder& builder)
 				{
@@ -151,15 +156,4 @@ namespace
 
 		module.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
 	}
-
-	/*jjj	void AddMenuExtension(FMenuBuilder& Builder)
-	{
-		Builder.AddMenuEntry(FGoogleTestForUECommands::Get().PluginAction);
-	}
-
-	void AddToolbarExtension(FToolBarBuilder& Builder)
-	{
-		Builder.AddToolBarButton(FGoogleTestForUECommands::Get().PluginAction);
-	}
-	*/
 }

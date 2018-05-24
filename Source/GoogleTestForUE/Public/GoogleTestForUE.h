@@ -10,6 +10,11 @@
 class FToolBarBuilder;
 class FMenuBuilder;
 
+namespace testing
+{
+	class TestEventListener;
+}
+
 
 class FGoogleTestForUEModule : public IModuleInterface
 {
@@ -21,5 +26,9 @@ public:
 	void PluginButtonClicked();
 
 private:
+	void InitialiseGoogleTest();
+	void RedirectGoogleTestOutput();
+
 	TSharedPtr<class FUICommandList> PluginCommands;
+	::testing::TestEventListener* m_GoogleTestEventListener = nullptr;
 };
