@@ -19,7 +19,7 @@
 
 #include <SharedPointer.h>
 #include <UICommandList.h>
-#include <LevelEditor.h>	//jjj
+#include <LevelEditor.h>
 #include <Framework/MultiBox/MultiBoxBuilder.h>
 #include "GoogleTestForUEToolbarStyle.h"
 #include "GoogleTestForUECommands.h"
@@ -37,9 +37,6 @@ namespace
 	void AddToolbarButton(
 		TSharedPtr<class FUICommandList> commands, IHasToolBarExtensibility& module,
 		TSharedPtr<FUICommandInfo> commandInfo, const FName& toolbarName, EExtensionHook::Position position);
-	/*jjj	void AddMenuExtension(FMenuBuilder& Builder);
-	void AddToolbarExtension(FToolBarBuilder& Builder);
-	*/
 }
 
 
@@ -48,7 +45,8 @@ namespace
 
 void FGoogleTestForUEModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin
+	// file per-module
 	InitialiseGoogleTest();
 
 	FGoogleTestForUEToolbarStyle::Initialize();
@@ -73,8 +71,8 @@ void FGoogleTestForUEModule::StartupModule()
 
 void FGoogleTestForUEModule::ShutdownModule()
 {
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
+	// This function may be called during shutdown to clean up your module.
+	// For modules that support dynamic reloading, we call this function before unloading the module.
 
 	FGoogleTestForUEToolbarStyle::Shutdown();
 
@@ -125,7 +123,6 @@ namespace
 
 		MenuExtender->AddMenuExtension(
 			menuName, position, commands,
-			//jjj	FMenuExtensionDelegate::CreateRaw(this, &FGoogleTestForUEModule::AddMenuExtension));
 			FMenuExtensionDelegate::CreateLambda(
 				[commandInfo](FMenuBuilder& builder)
 				{
@@ -142,7 +139,6 @@ namespace
 		TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender);
 		ToolbarExtender->AddToolBarExtension(
 			toolbarName, position, commands,
-			//jjj	FToolBarExtensionDelegate::CreateRaw(this, &FGoogleTestForUEModule::AddToolbarExtension));
 			FToolBarExtensionDelegate::CreateLambda(
 				[commandInfo](FToolBarBuilder& builder)
 				{
@@ -151,15 +147,4 @@ namespace
 
 		module.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
 	}
-
-	/*jjj	void AddMenuExtension(FMenuBuilder& Builder)
-	{
-		Builder.AddMenuEntry(FGoogleTestForUECommands::Get().PluginAction);
-	}
-
-	void AddToolbarExtension(FToolBarBuilder& Builder)
-	{
-		Builder.AddToolBarButton(FGoogleTestForUECommands::Get().PluginAction);
-	}
-	*/
 }
