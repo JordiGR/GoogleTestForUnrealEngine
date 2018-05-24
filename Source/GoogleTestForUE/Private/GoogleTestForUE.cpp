@@ -23,14 +23,14 @@
 #include <Framework/MultiBox/MultiBoxBuilder.h>
 #include "GoogleTestForUEToolbarStyle.h"
 #include "GoogleTestForUECommands.h"
-#include "LogStream.h"
+#include "GoogleTestOutputLogRedirector.h"
 
 
 namespace
 {
 	const FName GoogleTestForUEToolbarTabName("GoogleTestForUEToolbar");
 
-	void InitialiseGoogleTest();
+	void RunGoogleTests();
 	void AddMenuCommand(
 		TSharedPtr<class FUICommandList> commands, IHasMenuExtensibility& module,
 		TSharedPtr<FUICommandInfo> commandInfo, const FName& menuName, EExtensionHook::Position position);
@@ -81,17 +81,35 @@ void FGoogleTestForUEModule::ShutdownModule()
 
 void FGoogleTestForUEModule::PluginButtonClicked()
 {
-	LogStream stream;
+	RunGoogleTests();
+}
 
-	auto previousStream = std::cout.rdbuf(&stream);
+void FGoogleTestForUEModule::InitialiseGoogleTest()
+{
+	using StringPtr = char*;
+	auto argc = 1;
+	StringPtr* argv = new StringPtr[argc];
+	char* emptyString = "";
 
-	printf("********** PrintF redirected\n");
-	std::cout << "********** cout redirected" << std::endl;
+	argv[0] = emptyString;
 
-	RUN_ALL_TESTS();
+	::testing::InitGoogleTest(&argc, argv);
 
-	std::cout << std::endl;
-	std::cout.rdbuf(previousStream);
+	delete[] argv;
+
+	RedirectGoogleTestOutput();
+}
+
+void FGoogleTestForUEModule::RedirectGoogleTestOutput()
+{
+	if (m_GoogleTestEventListener == nullptr)
+	{
+		m_GoogleTestEventListener = new GoogleTestOutputLogRedirector;
+		auto& listeners = ::testing::UnitTest::GetInstance()->listeners();
+
+		delete listeners.Release(listeners.default_result_printer());
+		listeners.Append(m_GoogleTestEventListener);
+	}
 }
 
 #undef LOCTEXT_NAMESPACE
@@ -101,18 +119,9 @@ IMPLEMENT_MODULE(FGoogleTestForUEModule, GoogleTestForUE)
 
 namespace
 {
-	void InitialiseGoogleTest()
+	void RunGoogleTests()
 	{
-		using StringPtr = char*;
-		auto argc = 1;
-		StringPtr* argv = new StringPtr[argc];
-		char* emptyString = "";
-
-		argv[0] = emptyString;
-
-		::testing::InitGoogleTest(&argc, argv);
-
-		delete[] argv;
+		RUN_ALL_TESTS();
 	}
 
 	void AddMenuCommand(
