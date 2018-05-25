@@ -32,7 +32,7 @@ public class GoogleTestForUE : ModuleRules
 		SetUpGoogleTest(Target);
 	}
 
-	public void SetUpGoogleTest(ReadOnlyTargetRules Target)
+	private void SetUpGoogleTest(ReadOnlyTargetRules Target)
 	{
 		PublicIncludePaths.AddRange(
 			new string[]
