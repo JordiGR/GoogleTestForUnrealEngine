@@ -23,12 +23,9 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
-	void PluginButtonClicked();
-
 private:
 	void InitialiseGoogleTest();
 	void RedirectGoogleTestOutput();
 
-	TSharedPtr<class FUICommandList> PluginCommands;
 	::testing::TestEventListener* m_GoogleTestEventListener = nullptr;
 };

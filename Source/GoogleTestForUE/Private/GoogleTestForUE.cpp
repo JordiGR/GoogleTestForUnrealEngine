@@ -17,33 +17,46 @@
 	#pragma warning(pop)
 #endif
 
-#include <SharedPointer.h>
-#include <UICommandList.h>
+#include <CoreMinimal.h>
+#include <Framework/Commands/Commands.h>
 #include <LevelEditor.h>
-#include <Framework/MultiBox/MultiBoxBuilder.h>
-#include "GoogleTestForUEToolbarStyle.h"
-#include "GoogleTestForUECommands.h"
+#include "GUIUtilities.h"
+#include "GoogleTestForUEStyle.h"
 #include "GoogleTestOutputLogRedirector.h"
+
+
+#define LOCTEXT_NAMESPACE "FGoogleTestForUEModule"
 
 
 namespace
 {
+	class FGoogleTestForUECommands : public TCommands<FGoogleTestForUECommands>
+	{
+	public:
+		FGoogleTestForUECommands()
+			: TCommands<FGoogleTestForUECommands>(
+				TEXT("GoogleTestForUE"), NSLOCTEXT("Contexts", "GoogleTestForUE", "GoogleTestForUE Plugin"), NAME_None,
+				FGoogleTestForUEStyle::GetStyleSetName())
+		{}
+
+		// TCommands<> interface
+		void RegisterCommands() override
+		{
+			UI_COMMAND(PluginAction, "Run Google Test", "Run Google Test for all tests found in the project",
+				EUserInterfaceActionType::Button, FInputGesture());
+		}
+
+		TSharedPtr<FUICommandInfo> GetCommandInfo() const { return PluginAction; }
+
+	private:
+		TSharedPtr<FUICommandInfo> PluginAction;
+	};
+
 	const FName kGoogleTestForUEToolbarTabName("GoogleTestForUEToolbar");
 	const FName kGoogleTestForUEMenuName("GoogleTestForUEMenu");
 
 	void RunGoogleTests();
-	void AddMenuCommand(
-		TSharedPtr<class FUICommandList> commands, IHasMenuExtensibility& module,
-		TSharedPtr<FUICommandInfo> commandInfo, const FName& menuName,
-		const FName& neighbourMenuName, EExtensionHook::Position position);
-	void AddToolbarButton(
-		TSharedPtr<class FUICommandList> commands, IHasToolBarExtensibility& module,
-		TSharedPtr<FUICommandInfo> commandInfo, const FName& toolbarName,
-		const FName& neighbourToolbarName, EExtensionHook::Position position);
 }
-
-
-#define LOCTEXT_NAMESPACE "FGoogleTestForUEModule"
 
 
 void FGoogleTestForUEModule::StartupModule()
@@ -52,24 +65,17 @@ void FGoogleTestForUEModule::StartupModule()
 	// file per-module
 	InitialiseGoogleTest();
 
-	FGoogleTestForUEToolbarStyle::Initialize();
-	FGoogleTestForUEToolbarStyle::ReloadTextures();
+	FGoogleTestForUEStyle::Initialize();
+	FGoogleTestForUEStyle::ReloadTextures();
 
 	FGoogleTestForUECommands::Register();
 
-	auto commandInfo = FGoogleTestForUECommands::Get().PluginAction;
-
-	PluginCommands = MakeShareable(new FUICommandList);
-
-	PluginCommands->MapAction(
-		commandInfo,
-		FExecuteAction::CreateRaw(this, &FGoogleTestForUEModule::PluginButtonClicked),
-		FCanExecuteAction());
-
+	auto commandInfo = FGoogleTestForUECommands::Get().GetCommandInfo();
+	auto command = CreateCommand(commandInfo, []() { RunGoogleTests(); });
 	auto& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
-	AddMenuCommand(PluginCommands, levelEditorModule, commandInfo, kGoogleTestForUEMenuName, "WindowLayout", EExtensionHook::After);
-	AddToolbarButton(PluginCommands, levelEditorModule, commandInfo, kGoogleTestForUEToolbarTabName, "Game", EExtensionHook::After);
+	AddMenuCommand(levelEditorModule, command, commandInfo, kGoogleTestForUEMenuName, "WindowLayout");
+	AddToolbarButton(levelEditorModule, command, commandInfo, kGoogleTestForUEToolbarTabName, "Game");
 }
 
 void FGoogleTestForUEModule::ShutdownModule()
@@ -77,14 +83,9 @@ void FGoogleTestForUEModule::ShutdownModule()
 	// This function may be called during shutdown to clean up your module.
 	// For modules that support dynamic reloading, we call this function before unloading the module.
 
-	FGoogleTestForUEToolbarStyle::Shutdown();
+	FGoogleTestForUEStyle::Shutdown();
 
 	FGoogleTestForUECommands::Unregister();
-}
-
-void FGoogleTestForUEModule::PluginButtonClicked()
-{
-	RunGoogleTests();
 }
 
 void FGoogleTestForUEModule::InitialiseGoogleTest()
@@ -125,42 +126,5 @@ namespace
 	void RunGoogleTests()
 	{
 		RUN_ALL_TESTS();
-	}
-
-	void AddMenuCommand(
-		TSharedPtr<class FUICommandList> commands, IHasMenuExtensibility& module,
-		TSharedPtr<FUICommandInfo> commandInfo, const FName& menuName, const FName& neighbourMenuName, EExtensionHook::Position position)
-	{
-		TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender());
-
-		MenuExtender->AddMenuExtension(
-			neighbourMenuName, position, commands,
-			FMenuExtensionDelegate::CreateLambda(
-				[commandInfo, menuName](FMenuBuilder& builder)
-				{
-					builder.BeginSection(menuName);
-					builder.AddMenuEntry(commandInfo);
-					builder.EndSection();
-				}));
-
-		module.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
-	}
-
-	void AddToolbarButton(
-		TSharedPtr<class FUICommandList> commands, IHasToolBarExtensibility& module,
-		TSharedPtr<FUICommandInfo> commandInfo, const FName& toolbarName, const FName& neighbourToolbarName, EExtensionHook::Position position)
-	{
-		TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender);
-		ToolbarExtender->AddToolBarExtension(
-			neighbourToolbarName, position, commands,
-			FToolBarExtensionDelegate::CreateLambda(
-				[commandInfo, toolbarName](FToolBarBuilder& builder)
-				{
-					builder.BeginSection(toolbarName);
-					builder.AddToolBarButton(commandInfo);
-					builder.EndSection();
-				}));
-
-		module.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
 	}
 }
