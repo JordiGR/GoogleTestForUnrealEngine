@@ -46,7 +46,7 @@ TSharedRef< FSlateStyleSet > FGoogleTestForUEStyle::Create()
 	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("GoogleTestForUEStyle"));
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("GoogleTestForUE")->GetBaseDir() / TEXT("Resources"));
 
-	Style->Set("GoogleTestForUE.PluginAction", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
+	Style->Set("GoogleTestForUE.RunGoogleTest", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
 
 	return Style;
 }
