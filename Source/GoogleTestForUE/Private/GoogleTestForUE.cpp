@@ -42,14 +42,14 @@ namespace
 		// TCommands<> interface
 		void RegisterCommands() override
 		{
-			UI_COMMAND(RunGoogleTestAction, "Run Google Test", "Run Google Test for all tests found in the project",
+			UI_COMMAND(RunGoogleTest, "Run Google Test", "Run Google Test for all tests found in the project",
 				EUserInterfaceActionType::Button, FInputGesture());
 		}
 
-		TSharedPtr<FUICommandInfo> GetCommandInfo() const { return RunGoogleTestAction; }
+		TSharedPtr<FUICommandInfo> GetCommandInfo() const { return RunGoogleTest; }
 
 	private:
-		TSharedPtr<FUICommandInfo> RunGoogleTestAction;
+		TSharedPtr<FUICommandInfo> RunGoogleTest;
 	};
 
 	const FName kGoogleTestForUEToolbarTabName("GoogleTestForUEToolbar");
