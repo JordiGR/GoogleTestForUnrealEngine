@@ -1,15 +1,15 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
-#include "GoogleTestForUEToolbarStyle.h"
+#include "GoogleTestForUEStyle.h"
 #include "GoogleTestForUE.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Styling/SlateStyleRegistry.h"
 #include "SlateGameResources.h"
 #include "IPluginManager.h"
 
-TSharedPtr< FSlateStyleSet > FGoogleTestForUEToolbarStyle::StyleInstance = NULL;
+TSharedPtr< FSlateStyleSet > FGoogleTestForUEStyle::StyleInstance = NULL;
 
-void FGoogleTestForUEToolbarStyle::Initialize()
+void FGoogleTestForUEStyle::Initialize()
 {
 	if (!StyleInstance.IsValid())
 	{
@@ -18,16 +18,16 @@ void FGoogleTestForUEToolbarStyle::Initialize()
 	}
 }
 
-void FGoogleTestForUEToolbarStyle::Shutdown()
+void FGoogleTestForUEStyle::Shutdown()
 {
 	FSlateStyleRegistry::UnRegisterSlateStyle(*StyleInstance);
 	ensure(StyleInstance.IsUnique());
 	StyleInstance.Reset();
 }
 
-FName FGoogleTestForUEToolbarStyle::GetStyleSetName()
+FName FGoogleTestForUEStyle::GetStyleSetName()
 {
-	static FName StyleSetName(TEXT("GoogleTestForUEToolbarStyle"));
+	static FName StyleSetName(TEXT("GoogleTestForUEStyle"));
 	return StyleSetName;
 }
 
@@ -41,12 +41,12 @@ const FVector2D Icon16x16(16.0f, 16.0f);
 const FVector2D Icon20x20(20.0f, 20.0f);
 const FVector2D Icon40x40(40.0f, 40.0f);
 
-TSharedRef< FSlateStyleSet > FGoogleTestForUEToolbarStyle::Create()
+TSharedRef< FSlateStyleSet > FGoogleTestForUEStyle::Create()
 {
-	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("GoogleTestForUEToolbarStyle"));
+	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("GoogleTestForUEStyle"));
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("GoogleTestForUE")->GetBaseDir() / TEXT("Resources"));
 
-	Style->Set("GoogleTestForUE.PluginAction", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
+	Style->Set("GoogleTestForUE.RunGoogleTest", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
 
 	return Style;
 }
@@ -57,7 +57,7 @@ TSharedRef< FSlateStyleSet > FGoogleTestForUEToolbarStyle::Create()
 #undef TTF_FONT
 #undef OTF_FONT
 
-void FGoogleTestForUEToolbarStyle::ReloadTextures()
+void FGoogleTestForUEStyle::ReloadTextures()
 {
 	if (FSlateApplication::IsInitialized())
 	{
@@ -65,7 +65,7 @@ void FGoogleTestForUEToolbarStyle::ReloadTextures()
 	}
 }
 
-const ISlateStyle& FGoogleTestForUEToolbarStyle::Get()
+const ISlateStyle& FGoogleTestForUEStyle::Get()
 {
 	return *StyleInstance;
 }
