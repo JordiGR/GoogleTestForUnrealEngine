@@ -22,7 +22,11 @@ public class GoogleTestForUE : ModuleRules
 		PublicIncludePaths.AddRange(new string[] {"GoogleTestForUE/Public"});
 		PrivateIncludePaths.AddRange(new string[] {"GoogleTestForUE/Private"});
 		PublicDependencyModuleNames.AddRange(new string[] {"Core"});
-		PrivateDependencyModuleNames.AddRange(new string[] {"CoreUObject", "Engine", "Slate", "SlateCore", "UnrealEd", "PropertyEditor", "LevelEditor", "Projects"});
+		PrivateDependencyModuleNames.AddRange(
+			new string[]
+			{
+				"CoreUObject", "Engine", "Slate", "SlateCore", "UnrealEd", "PropertyEditor", "LevelEditor", "Projects"
+			});
 		DynamicallyLoadedModuleNames.AddRange(new string[] {});
 
 		SetUpGoogleTest(Target);
