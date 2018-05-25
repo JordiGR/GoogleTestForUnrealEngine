@@ -28,15 +28,18 @@
 
 namespace
 {
-	const FName GoogleTestForUEToolbarTabName("GoogleTestForUEToolbar");
+	const FName kGoogleTestForUEToolbarTabName("GoogleTestForUEToolbar");
+	const FName kGoogleTestForUEMenuName("GoogleTestForUEMenu");
 
 	void RunGoogleTests();
 	void AddMenuCommand(
 		TSharedPtr<class FUICommandList> commands, IHasMenuExtensibility& module,
-		TSharedPtr<FUICommandInfo> commandInfo, const FName& menuName, EExtensionHook::Position position);
+		TSharedPtr<FUICommandInfo> commandInfo, const FName& menuName,
+		const FName& neighbourMenuName, EExtensionHook::Position position);
 	void AddToolbarButton(
 		TSharedPtr<class FUICommandList> commands, IHasToolBarExtensibility& module,
-		TSharedPtr<FUICommandInfo> commandInfo, const FName& toolbarName, EExtensionHook::Position position);
+		TSharedPtr<FUICommandInfo> commandInfo, const FName& toolbarName,
+		const FName& neighbourToolbarName, EExtensionHook::Position position);
 }
 
 
@@ -65,8 +68,8 @@ void FGoogleTestForUEModule::StartupModule()
 
 	auto& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
-	AddMenuCommand(PluginCommands, levelEditorModule, commandInfo, "WindowLayout", EExtensionHook::After);
-	AddToolbarButton(PluginCommands, levelEditorModule, commandInfo, "Game", EExtensionHook::After);
+	AddMenuCommand(PluginCommands, levelEditorModule, commandInfo, kGoogleTestForUEMenuName, "WindowLayout", EExtensionHook::After);
+	AddToolbarButton(PluginCommands, levelEditorModule, commandInfo, kGoogleTestForUEToolbarTabName, "Game", EExtensionHook::After);
 }
 
 void FGoogleTestForUEModule::ShutdownModule()
@@ -126,16 +129,18 @@ namespace
 
 	void AddMenuCommand(
 		TSharedPtr<class FUICommandList> commands, IHasMenuExtensibility& module,
-		TSharedPtr<FUICommandInfo> commandInfo, const FName& menuName, EExtensionHook::Position position)
+		TSharedPtr<FUICommandInfo> commandInfo, const FName& menuName, const FName& neighbourMenuName, EExtensionHook::Position position)
 	{
 		TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender());
 
 		MenuExtender->AddMenuExtension(
-			menuName, position, commands,
+			neighbourMenuName, position, commands,
 			FMenuExtensionDelegate::CreateLambda(
-				[commandInfo](FMenuBuilder& builder)
+				[commandInfo, menuName](FMenuBuilder& builder)
 				{
+					builder.BeginSection(menuName);
 					builder.AddMenuEntry(commandInfo);
+					builder.EndSection();
 				}));
 
 		module.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
@@ -143,15 +148,17 @@ namespace
 
 	void AddToolbarButton(
 		TSharedPtr<class FUICommandList> commands, IHasToolBarExtensibility& module,
-		TSharedPtr<FUICommandInfo> commandInfo, const FName& toolbarName, EExtensionHook::Position position)
+		TSharedPtr<FUICommandInfo> commandInfo, const FName& toolbarName, const FName& neighbourToolbarName, EExtensionHook::Position position)
 	{
 		TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender);
 		ToolbarExtender->AddToolBarExtension(
-			toolbarName, position, commands,
+			neighbourToolbarName, position, commands,
 			FToolBarExtensionDelegate::CreateLambda(
-				[commandInfo](FToolBarBuilder& builder)
+				[commandInfo, toolbarName](FToolBarBuilder& builder)
 				{
+					builder.BeginSection(toolbarName);
 					builder.AddToolBarButton(commandInfo);
+					builder.EndSection();
 				}));
 
 		module.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
