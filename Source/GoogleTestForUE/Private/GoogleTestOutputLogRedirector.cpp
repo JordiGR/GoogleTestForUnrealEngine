@@ -9,7 +9,7 @@ namespace
 	const auto kSuccessColour = COLOR_GREEN;
 	const auto kFailColour = COLOR_RED;
 
-	void PrintToLog(const std::ostringstream& output, const TCHAR* colour = nullptr);
+	void PrintToLog(const std::ostringstream& output);
 }
 
 
@@ -27,7 +27,7 @@ void GoogleTestOutputLogRedirector::OnTestProgramStart(const ::testing::UnitTest
 
 	output << "*** STARTING TEST RUN ***" << std::endl;
 
-	PrintToLog(output, COLOR_GREEN);
+	PrintToLog(output);
 }
 
 // Fired before each iteration of tests starts. There may be more than
@@ -55,7 +55,7 @@ void GoogleTestOutputLogRedirector::OnTestStart(const ::testing::TestInfo& test_
 
 	output << "Starting test " << test_info.test_case_name() << "." << test_info.name() << std::endl;
 
-	PrintToLog(output, kDefaultColour);
+	PrintToLog(output);
 	*/
 }
 
@@ -67,7 +67,7 @@ void GoogleTestOutputLogRedirector::OnTestPartResult(const ::testing::TestPartRe
 	output << (test_part_result.failed() ? "Failure" : "Success") << " in " << test_part_result.file_name() << ":" << test_part_result.line_number() << std::endl
 		<< test_part_result.summary() << std::endl;
 
-	PrintToLog(output, test_part_result.passed() ? kSuccessColour : kFailColour);
+	PrintToLog(output);
 }
 
 // Fired after the test ends.
@@ -79,7 +79,7 @@ void GoogleTestOutputLogRedirector::OnTestEnd(const ::testing::TestInfo& test_in
 	output << (testSuccess ? "[PASSED] " : "[FAILED] ")
 		<< test_info.test_case_name() << "." << test_info.name() << std::endl;
 
-	PrintToLog(output, testSuccess ? kSuccessColour : kFailColour);
+	PrintToLog(output);
 }
 
 // Fired after the test case ends.
@@ -106,23 +106,13 @@ void GoogleTestOutputLogRedirector::OnTestProgramEnd(const ::testing::UnitTest& 
 	output << "*** FINISHED TEST RUN (" << unit_test.elapsed_time() << " ms): TEST RUN "
 		<< (unit_test.Passed()? "PASSED" : "FAILED") << " ***" << std::endl;
 
-	PrintToLog(output, unit_test.Passed() ? kSuccessColour : kFailColour);
+	PrintToLog(output);
 }
 
 namespace
 {
-	void PrintToLog(const std::ostringstream& output, const TCHAR* colour)
+	void PrintToLog(const std::ostringstream& output)
 	{
-		if (colour != nullptr)
-		{
-			UE_LOG(GoogleTest, SetColor, TEXT("%s"), colour);
-		}
-
 		UE_LOG(GoogleTest, GOOGLE_TEST_LOG_VERBOSITY, TEXT("%s"), *FString(output.str().c_str()));
-
-		if (colour != nullptr)
-		{
-			UE_LOG(GoogleTest, SetColor, TEXT("%s"), COLOR_NONE);
-		}
 	}
 }
