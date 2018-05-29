@@ -40,13 +40,17 @@ namespace
 		// TCommands<> interface
 		void RegisterCommands() override
 		{
+			//UI_COMMAND(ListGoogleTest, "List Google Test", "List all tests found in the project",
+			//	EUserInterfaceActionType::Button, FInputGesture());
 			UI_COMMAND(RunGoogleTest, "Run Google Test", "Run Google Test for all tests found in the project",
 				EUserInterfaceActionType::Button, FInputGesture());
 		}
 
+		//TSharedPtr<FUICommandInfo> GetListCommandInfo() const { return ListGoogleTest; }
 		TSharedPtr<FUICommandInfo> GetRunCommandInfo() const { return RunGoogleTest; }
 
 	private:
+		//TSharedPtr<FUICommandInfo> ListGoogleTest;
 		TSharedPtr<FUICommandInfo> RunGoogleTest;
 	};
 
@@ -73,6 +77,7 @@ void FGoogleTestForUEModule::StartupModule()
 	m_CommandsData = std::make_unique<CommandsData>(
 		CommandsData::CommandsDataContainer
 		{
+			//std::make_pair(commandsHolder.GetListCommandInfo(), [this]() { ListGoogleTests(); }),
 			std::make_pair(commandsHolder.GetRunCommandInfo(), [this]() { RunGoogleTests(); })
 		});
 
@@ -120,8 +125,17 @@ void FGoogleTestForUEModule::RedirectGoogleTestOutput()
 	}
 }
 
+/*int FGoogleTestForUEModule::ListGoogleTests()
+{
+	::testing::GTEST_FLAG(list_tests) = true;
+
+	return RUN_ALL_TESTS();
+}*/
+
 int FGoogleTestForUEModule::RunGoogleTests()
 {
+	::testing::GTEST_FLAG(list_tests) = false;
+
 	return RUN_ALL_TESTS();
 }
 

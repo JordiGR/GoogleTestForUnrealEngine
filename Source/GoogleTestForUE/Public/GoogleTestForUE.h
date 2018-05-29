@@ -25,6 +25,7 @@ public:
 private:
 	void InitialiseGoogleTest();
 	void RedirectGoogleTestOutput();
+	//int ListGoogleTests();
 	int RunGoogleTests();
 
 	::testing::TestEventListener* m_GoogleTestEventListener = nullptr;
