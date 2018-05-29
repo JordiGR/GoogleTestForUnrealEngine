@@ -5,50 +5,102 @@
 #include <AssetEditorToolkit.h>
 
 
-TSharedPtr<FUICommandList> CreateCommand(TSharedPtr<FUICommandInfo> commandInfo, std::function<void()> callback)
+namespace
 {
-	TSharedPtr<FUICommandList> command = MakeShareable(new FUICommandList);
-
-	command->MapAction(commandInfo, FExecuteAction::CreateLambda(callback), FCanExecuteAction());
-
-	return command;
+	TSharedPtr<FUICommandList> CreateCommandsList(const CommandsData::CommandsDataContainer& commandsData);
 }
 
-void AddMenuCommand(
-	IHasMenuExtensibility& module,
-	TSharedPtr<FUICommandList> commands, TSharedPtr<FUICommandInfo> commandInfo, const FName& menuName,
+
+CommandsData::CommandsData(const CommandsDataContainer& commandsData)
+	: m_CommandsData(commandsData)
+{
+}
+
+TSharedPtr<FUICommandList> CommandsData::GetCommandsList() const
+{
+	if (!m_CommandsList.IsValid())
+	{
+		m_CommandsList = CreateCommandsList(m_CommandsData);
+	}
+
+	return m_CommandsList;
+}
+
+
+void AddMenuCommands(
+	IHasMenuExtensibility& module, const CommandsData& commandsData, const FName& menuName,
 	const FName& neighbourMenuName, EExtensionHook::Position position)
 {
 	TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender());
+	const bool newMenu = (neighbourMenuName != FName());
 
 	MenuExtender->AddMenuExtension(
-		neighbourMenuName, position, commands,
+		(newMenu) ? neighbourMenuName : menuName, position, commandsData.GetCommandsList(),
 		FMenuExtensionDelegate::CreateLambda(
-			[commandInfo, menuName](FMenuBuilder& builder)
+			[commandsData, menuName, newMenu](FMenuBuilder& builder)
 			{
-				builder.BeginSection(menuName);
-				builder.AddMenuEntry(commandInfo);
-				builder.EndSection();
+				if (newMenu)
+				{
+					builder.BeginSection(menuName);
+				}
+
+				for (auto commandData : commandsData.GetCommandsData())
+				{
+					builder.AddMenuEntry(commandData.first);
+				}
+
+				if (newMenu)
+				{
+					builder.EndSection();
+				}
 			}));
 
 	module.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
 }
 
-void AddToolbarButton(
-	IHasToolBarExtensibility& module,
-	TSharedPtr<FUICommandList> commands, TSharedPtr<FUICommandInfo> commandInfo, const FName& toolbarName,
+void AddToolbarButtons(
+	IHasToolBarExtensibility& module, const CommandsData& commandsData, const FName& toolbarName,
 	const FName& neighbourToolbarName, EExtensionHook::Position position)
 {
 	TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender);
+	const bool newToolbar = (neighbourToolbarName != FName());
+
 	ToolbarExtender->AddToolBarExtension(
-		neighbourToolbarName, position, commands,
+		(newToolbar) ? neighbourToolbarName : toolbarName, position, commandsData.GetCommandsList(),
 		FToolBarExtensionDelegate::CreateLambda(
-			[commandInfo, toolbarName](FToolBarBuilder& builder)
+			[commandsData, toolbarName, newToolbar](FToolBarBuilder& builder)
 			{
-				builder.BeginSection(toolbarName);
-				builder.AddToolBarButton(commandInfo);
-				builder.EndSection();
+				if (newToolbar)
+				{
+					builder.BeginSection(toolbarName);
+				}
+
+				for (auto commandData : commandsData.GetCommandsData())
+				{
+					builder.AddToolBarButton(commandData.first);
+				}
+
+				if (newToolbar)
+				{
+					builder.EndSection();
+				}
 			}));
 
 	module.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
+}
+
+namespace
+{
+	TSharedPtr<FUICommandList> CreateCommandsList(const CommandsData::CommandsDataContainer& commandsData)
+	{
+		auto commandsList = static_cast<TSharedPtr<FUICommandList>>(MakeShareable(new FUICommandList));
+
+		for (const auto& commandData : commandsData)
+		{
+			commandsList->MapAction(commandData.first, FExecuteAction::CreateLambda(commandData.second),
+				FCanExecuteAction());
+		}
+
+		return commandsList;
+	}
 }

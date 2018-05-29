@@ -2,13 +2,12 @@
 
 #pragma once
 
-
+#include <memory>
 #include "CoreMinimal.h"
 #include "ModuleManager.h"
 
 
-class FToolBarBuilder;
-class FMenuBuilder;
+class CommandsData;
 
 namespace testing
 {
@@ -26,6 +25,8 @@ public:
 private:
 	void InitialiseGoogleTest();
 	void RedirectGoogleTestOutput();
+	int RunGoogleTests();
 
 	::testing::TestEventListener* m_GoogleTestEventListener = nullptr;
+	std::unique_ptr<CommandsData> m_CommandsData;
 };

@@ -2,6 +2,7 @@
 
 
 #include <functional>
+#include <vector>
 #include <MultiBoxExtender.h>
 
 
@@ -11,12 +12,25 @@ class FUICommandInfo;
 class FUICommandList;
 
 
-TSharedPtr<FUICommandList> CreateCommand(TSharedPtr<FUICommandInfo> commandInfo, std::function<void()> callback);
-void AddMenuCommand(
-	IHasMenuExtensibility& module,
-	TSharedPtr<FUICommandList> commands, TSharedPtr<FUICommandInfo> commandInfo, const FName& menuName,
-	const FName& neighbourMenuName, EExtensionHook::Position position = EExtensionHook::After);
-void AddToolbarButton(
-	IHasToolBarExtensibility& module,
-	TSharedPtr<FUICommandList> commands, TSharedPtr<FUICommandInfo> commandInfo, const FName& toolbarName,
-	const FName& neighbourToolbarName, EExtensionHook::Position position = EExtensionHook::After);
+class CommandsData
+{
+public:
+	using CommandData = std::pair<TSharedPtr<FUICommandInfo>, std::function<void()>>;
+	using CommandsDataContainer = std::vector<CommandData>;
+
+	explicit CommandsData(const CommandsDataContainer& commandsData);
+	TSharedPtr<FUICommandList> GetCommandsList() const;
+	CommandsDataContainer GetCommandsData() const { return m_CommandsData;  }
+
+private:
+	mutable TSharedPtr<FUICommandList> m_CommandsList;
+	CommandsDataContainer m_CommandsData;
+};
+
+
+void AddMenuCommands(
+	IHasMenuExtensibility& module, const CommandsData& commandsData, const FName& menuName,
+	const FName& neighbourMenuName = FName(), EExtensionHook::Position position = EExtensionHook::After);
+void AddToolbarButtons(
+	IHasToolBarExtensibility& module, const CommandsData& commandsData, const FName& toolbarName,
+	const FName& neighbourToolbarName = FName(), EExtensionHook::Position position = EExtensionHook::After);

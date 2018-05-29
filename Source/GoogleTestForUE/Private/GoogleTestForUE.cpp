@@ -2,8 +2,6 @@
 
 #include "GoogleTestForUE.h"
 
-#include <memory>
-
 #if defined(_MSC_VER)
 	#pragma warning(push)
 	#pragma warning(disable:4668)
@@ -46,7 +44,7 @@ namespace
 				EUserInterfaceActionType::Button, FInputGesture());
 		}
 
-		TSharedPtr<FUICommandInfo> GetCommandInfo() const { return RunGoogleTest; }
+		TSharedPtr<FUICommandInfo> GetRunCommandInfo() const { return RunGoogleTest; }
 
 	private:
 		TSharedPtr<FUICommandInfo> RunGoogleTest;
@@ -54,8 +52,6 @@ namespace
 
 	const FName kGoogleTestForUEToolbarTabName("GoogleTestForUEToolbar");
 	const FName kGoogleTestForUEMenuName("GoogleTestForUEMenu");
-
-	void RunGoogleTests();
 }
 
 
@@ -70,12 +66,18 @@ void FGoogleTestForUEModule::StartupModule()
 
 	FGoogleTestForUECommands::Register();
 
-	auto commandInfo = FGoogleTestForUECommands::Get().GetCommandInfo();
-	auto command = CreateCommand(commandInfo, []() { RunGoogleTests(); });
 	auto& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
-	AddMenuCommand(levelEditorModule, command, commandInfo, kGoogleTestForUEMenuName, "WindowLayout");
-	AddToolbarButton(levelEditorModule, command, commandInfo, kGoogleTestForUEToolbarTabName, "Game");
+	const auto commandsHolder = FGoogleTestForUECommands::Get();
+
+	m_CommandsData = std::make_unique<CommandsData>(
+		CommandsData::CommandsDataContainer
+		{
+			std::make_pair(commandsHolder.GetRunCommandInfo(), [this]() { RunGoogleTests(); })
+		});
+
+	AddMenuCommands(levelEditorModule, *m_CommandsData, kGoogleTestForUEMenuName, "WindowLayout");
+	AddToolbarButtons(levelEditorModule, *m_CommandsData, kGoogleTestForUEToolbarTabName, "Game");
 }
 
 void FGoogleTestForUEModule::ShutdownModule()
@@ -90,16 +92,18 @@ void FGoogleTestForUEModule::ShutdownModule()
 
 void FGoogleTestForUEModule::InitialiseGoogleTest()
 {
-	using StringPtr = char*;
-	auto argc = 1;
-	StringPtr* argv = new StringPtr[argc];
-	char* emptyString = "";
+	{
+		using StringPtr = char*;
+		auto argc = 1;
+		StringPtr* argv = new StringPtr[argc];
+		char* emptyString = "";
 
-	argv[0] = emptyString;
+		argv[0] = emptyString;
 
-	::testing::InitGoogleTest(&argc, argv);
+		::testing::InitGoogleTest(&argc, argv);
 
-	delete[] argv;
+		delete[] argv;
+	}
 
 	RedirectGoogleTestOutput();
 }
@@ -116,15 +120,12 @@ void FGoogleTestForUEModule::RedirectGoogleTestOutput()
 	}
 }
 
+int FGoogleTestForUEModule::RunGoogleTests()
+{
+	return RUN_ALL_TESTS();
+}
+
+
 #undef LOCTEXT_NAMESPACE
 	
 IMPLEMENT_MODULE(FGoogleTestForUEModule, GoogleTestForUE)
-
-
-namespace
-{
-	void RunGoogleTests()
-	{
-		RUN_ALL_TESTS();
-	}
-}
