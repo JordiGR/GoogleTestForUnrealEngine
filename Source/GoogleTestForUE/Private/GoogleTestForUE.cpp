@@ -18,7 +18,6 @@
 #include <CoreMinimal.h>
 #include <Framework/Commands/Commands.h>
 #include <LevelEditor.h>
-#include "GUIUtilities.h"
 #include "GoogleTestForUEStyle.h"
 #include "GoogleTestOutputLogRedirector.h"
 
@@ -28,36 +27,54 @@
 
 namespace
 {
-	class FGoogleTestForUECommands : public TCommands<FGoogleTestForUECommands>
-	{
-	public:
-		FGoogleTestForUECommands()
-			: TCommands<FGoogleTestForUECommands>(
-				TEXT("GoogleTestForUE"), NSLOCTEXT("Contexts", "GoogleTestForUE", "GoogleTestForUE Plugin"), NAME_None,
-				FGoogleTestForUEStyle::GetStyleSetName())
-		{}
+	using ExtendedModuleType = FLevelEditorModule;
+	const auto kExtendedModuleName = FName{"LevelEditor"};
 
-		// TCommands<> interface
-		void RegisterCommands() override
-		{
-			//UI_COMMAND(ListGoogleTest, "List Google Test", "List all tests found in the project",
-			//	EUserInterfaceActionType::Button, FInputGesture());
-			UI_COMMAND(RunGoogleTest, "Run Google Test", "Run Google Test for all tests found in the project",
-				EUserInterfaceActionType::Button, FInputGesture());
-		}
+	const auto kMenuName = FName{"GoogleTestForUEMenu"};
+	const auto kNeighbourMenuName = FName{"WindowLayot"};
+	const auto kMenuPosition = EExtensionHook::After;
 
-		//TSharedPtr<FUICommandInfo> GetListCommandInfo() const { return ListGoogleTest; }
-		TSharedPtr<FUICommandInfo> GetRunCommandInfo() const { return RunGoogleTest; }
-
-	private:
-		//TSharedPtr<FUICommandInfo> ListGoogleTest;
-		TSharedPtr<FUICommandInfo> RunGoogleTest;
-	};
-
-	const FName kGoogleTestForUEToolbarTabName("GoogleTestForUEToolbar");
-	const FName kGoogleTestForUEMenuName("GoogleTestForUEMenu");
+	const auto kToolbarName = FName{"GoogleTestForUEToolbar"};
+	const auto kNeighbourToolbarName = FName{"Game"};
+	const auto kToolbarPosition = EExtensionHook::After;
 }
 
+
+FGoogleTestForUEModule::FGoogleTestForUECommands::FGoogleTestForUECommands()
+	: TCommands<FGoogleTestForUECommands>(
+		TEXT("GoogleTestForUE"), NSLOCTEXT("Contexts", "GoogleTestForUE", "GoogleTestForUE Plugin"), NAME_None,
+		FGoogleTestForUEStyle::GetStyleSetName())
+{}
+
+// TCommands<> interface
+void FGoogleTestForUEModule::FGoogleTestForUECommands::RegisterCommands()
+{
+	//UI_COMMAND(ListGoogleTest, "List Google Test", "List all tests found in the project",
+	//	EUserInterfaceActionType::Button, FInputGesture());
+	UI_COMMAND(RunGoogleTest, "Run Google Test", "Run Google Test for all tests found in the project",
+		EUserInterfaceActionType::Button, FInputGesture());
+}
+
+
+FGoogleTestForUEModule::GoogleTestForUEExtensionHolder::GoogleTestForUEExtensionHolder(
+	FGoogleTestForUEModule& parentModule,
+	FName menuName, FName neighbourMenuName, EExtensionHook::Position menuPosition,
+	FName toolbarName, FName neighbourToolbarName, EExtensionHook::Position toolbarPosition) :
+	Base(menuName, neighbourMenuName, menuPosition, toolbarName, neighbourToolbarName, toolbarPosition),
+	m_ParentModule(parentModule)
+{}
+
+void FGoogleTestForUEModule::GoogleTestForUEExtensionHolder::RegisterCommandCallbacks(const CommandHolder& commandHolder)
+{
+	//AddOrReplaceCommandAction(commandHolder.GetListCommandInfo(), [this]() { m_ParentModule.ListGoogleTests(); });
+	AddOrReplaceCommandAction(commandHolder.GetRunCommandInfo(), [this]() { m_ParentModule.RunGoogleTests(); });
+}
+
+
+FGoogleTestForUEModule::FGoogleTestForUEModule() :
+	m_GuiExtension(
+		*this, kMenuName, kNeighbourMenuName, kMenuPosition, kToolbarName, kNeighbourToolbarName, kToolbarPosition)
+{}
 
 void FGoogleTestForUEModule::StartupModule()
 {
@@ -65,24 +82,9 @@ void FGoogleTestForUEModule::StartupModule()
 	// file per-module
 	InitialiseGoogleTest();
 
-	FGoogleTestForUEStyle::Initialize();
-	FGoogleTestForUEStyle::ReloadTextures();
+	auto& module = FModuleManager::GetModuleChecked<ExtendedModuleType>(kExtendedModuleName);
 
-	FGoogleTestForUECommands::Register();
-
-	auto& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-
-	const auto commandsHolder = FGoogleTestForUECommands::Get();
-
-	m_CommandsData = std::make_unique<CommandsData>(
-		CommandsData::CommandsDataContainer
-		{
-			//std::make_pair(commandsHolder.GetListCommandInfo(), [this]() { ListGoogleTests(); }),
-			std::make_pair(commandsHolder.GetRunCommandInfo(), [this]() { RunGoogleTests(); })
-		});
-
-	AddMenuCommands(levelEditorModule, *m_CommandsData, kGoogleTestForUEMenuName, "WindowLayout");
-	AddToolbarButtons(levelEditorModule, *m_CommandsData, kGoogleTestForUEToolbarTabName, "Game");
+	m_GuiExtension.StartUp(GetModuleMenuExtensibility(&module), GetModuleToolbarExtensibility(&module));
 }
 
 void FGoogleTestForUEModule::ShutdownModule()
@@ -90,9 +92,9 @@ void FGoogleTestForUEModule::ShutdownModule()
 	// This function may be called during shutdown to clean up your module.
 	// For modules that support dynamic reloading, we call this function before unloading the module.
 
-	FGoogleTestForUEStyle::Shutdown();
+	auto& module = FModuleManager::GetModuleChecked<ExtendedModuleType>(kExtendedModuleName);
 
-	FGoogleTestForUECommands::Unregister();
+	m_GuiExtension.ShutDown(GetModuleMenuExtensibility(&module), GetModuleToolbarExtensibility(&module));
 }
 
 void FGoogleTestForUEModule::InitialiseGoogleTest()

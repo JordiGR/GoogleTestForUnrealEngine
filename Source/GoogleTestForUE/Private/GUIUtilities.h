@@ -1,36 +1,44 @@
 #pragma once
 
 
-#include <functional>
-#include <vector>
-#include <MultiBoxExtender.h>
-
-
 class IHasMenuExtensibility;
 class IHasToolBarExtensibility;
-class FUICommandInfo;
-class FUICommandList;
 
 
-class CommandsData
+using ExtensionData = std::pair<TSharedPtr<FExtender>, TSharedPtr<const FExtensionBase>>;
+
+template <class TBase, class TDerived>
+inline TBase* GetSafeCastToBase(TDerived* object)
 {
-public:
-	using CommandData = std::pair<TSharedPtr<FUICommandInfo>, std::function<void()>>;
-	using CommandsDataContainer = std::vector<CommandData>;
+	return (std::is_base_of<TBase, TDerived>::value) ? static_cast<TBase*>(object) : nullptr;
+}
 
-	explicit CommandsData(const CommandsDataContainer& commandsData);
-	TSharedPtr<FUICommandList> GetCommandsList() const;
-	CommandsDataContainer GetCommandsData() const { return m_CommandsData;  }
+template <class TBase, class TDerived>
+inline const TBase* GetSafeCastToBase(const TDerived* object)
+{
+	return GetSafeCastToBase(const_cast<TDerived>(object));
+}
 
-private:
-	mutable TSharedPtr<FUICommandList> m_CommandsList;
-	CommandsDataContainer m_CommandsData;
-};
+template <class TModule>
+inline IHasMenuExtensibility* GetModuleMenuExtensibility(TModule* module)
+{
+	return GetSafeCastToBase<IHasMenuExtensibility, TModule>(module);
+}
 
+template <class TModule>
+inline const IHasMenuExtensibility* GetModuleMenuExtensibility(const TModule* module)
+{
+	return GetModuleMenuExtensibility(const_cast<TModule*>(module));
+}
 
-void AddMenuCommands(
-	IHasMenuExtensibility& module, const CommandsData& commandsData, const FName& menuName,
-	const FName& neighbourMenuName = FName(), EExtensionHook::Position position = EExtensionHook::After);
-void AddToolbarButtons(
-	IHasToolBarExtensibility& module, const CommandsData& commandsData, const FName& toolbarName,
-	const FName& neighbourToolbarName = FName(), EExtensionHook::Position position = EExtensionHook::After);
+template <class TModule>
+inline IHasToolBarExtensibility* GetModuleToolbarExtensibility(TModule* module)
+{
+	return GetSafeCastToBase<IHasToolBarExtensibility, TModule>(module);
+}
+
+template <class TModule>
+const IHasToolBarExtensibility* GetModuleToolbarExtensibility(const TModule* module)
+{
+	return GetModuleToolbarExtensibility(const_cast<TModule*>(module));
+}
