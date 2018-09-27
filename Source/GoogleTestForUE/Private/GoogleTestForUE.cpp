@@ -125,6 +125,8 @@ namespace
 {
 	void RunGoogleTests()
 	{
+		::testing::UnitTest::GetInstance()->RemoveDuplicateTests();
+
 		RUN_ALL_TESTS();
 	}
 }
