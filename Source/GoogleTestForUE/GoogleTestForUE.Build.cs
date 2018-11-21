@@ -43,9 +43,10 @@ public class GoogleTestForUE : ModuleRules
 		PrivateIncludePaths.AddRange(
 			new string[]
 			{
-				Path.Combine(GoogleTestPath, "googletest")
-			});
+				Path.Combine(GoogleTestPath, "googletest"),
+                Path.Combine(GoogleTestPath, "googlemock")
+            });
 
 		PrivateDefinitions.Add("GTEST_CREATE_SHARED_LIBRARY=1");
-	}
+    }
 }
