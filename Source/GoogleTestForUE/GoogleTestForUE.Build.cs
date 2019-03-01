@@ -5,47 +5,38 @@ using UnrealBuildTool;
 
 public class GoogleTestForUE : ModuleRules
 {
-	private string ModulePath
-	{
-		get { return ModuleDirectory; }
-	}
-
-	private string GoogleTestPath
-	{
-		get { return Path.Combine(ModulePath, "../../ThirdParty/googletest/"); }
-	}
-
 	public GoogleTestForUE(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicIncludePaths.AddRange(new string[] {"GoogleTestForUE/Public"});
-		PrivateIncludePaths.AddRange(new string[] {"GoogleTestForUE/Private"});
-		PublicDependencyModuleNames.AddRange(new string[] {"Core"});
+		PublicIncludePaths.AddRange(new string[]{Path.Combine(ModuleDirectory, "Public")});
+		PrivateIncludePaths.AddRange(new string[]{Path.Combine(ModuleDirectory, "Private")});
+
+		PublicDependencyModuleNames.AddRange(new string[]{"Core"});
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"CoreUObject", "Engine", "Slate", "SlateCore", "UnrealEd", "PropertyEditor", "LevelEditor", "Projects"
 			});
-		DynamicallyLoadedModuleNames.AddRange(new string[] {});
+
+		DynamicallyLoadedModuleNames.AddRange(new string[]{});
 
 		SetUpGoogleTest(Target);
 	}
 
 	private void SetUpGoogleTest(ReadOnlyTargetRules Target)
 	{
+		var googleTestMainPath = Path.Combine(ModuleDirectory, "..", "..", "ThirdParty", "googletest");
+		var googleTestPath = Path.Combine(googleTestMainPath, "googletest");
+		var googleMockPath = Path.Combine(googleTestMainPath, "googlemock");
+
 		PublicIncludePaths.AddRange(
 			new string[]
 			{
-				Path.Combine(GoogleTestPath, "googletest/include"),
-				Path.Combine(GoogleTestPath, "googlemock/include")
+				Path.Combine(googleTestPath, "include"),
+				Path.Combine(googleMockPath, "include")
 			});
-		PrivateIncludePaths.AddRange(
-			new string[]
-			{
-				Path.Combine(GoogleTestPath, "googletest"),
-                Path.Combine(GoogleTestPath, "googlemock")
-            });
+		PrivateIncludePaths.AddRange(new string[]{googleTestPath, googleMockPath});
 
 		PrivateDefinitions.Add("GTEST_CREATE_SHARED_LIBRARY=1");
     }
