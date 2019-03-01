@@ -1,7 +1,7 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
-#include "GoogleTestForUEStyle.h"
-#include "GoogleTestForUE.h"
+#include "GoogleTestForUnrealStyle.h"
+#include "GoogleTestForUnrealModule.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Styling/SlateStyleRegistry.h"
 #include "SlateGameResources.h"
