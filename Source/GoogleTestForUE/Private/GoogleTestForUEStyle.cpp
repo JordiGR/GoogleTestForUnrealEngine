@@ -44,7 +44,7 @@ const FVector2D Icon40x40(40.0f, 40.0f);
 TSharedRef< FSlateStyleSet > FGoogleTestForUEStyle::Create()
 {
 	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("GoogleTestForUEStyle"));
-	Style->SetContentRoot(IPluginManager::Get().FindPlugin("GoogleTestForUE")->GetBaseDir() / TEXT("Resources"));
+	Style->SetContentRoot(IPluginManager::Get().FindPlugin("GoogleTestForUnreal")->GetBaseDir() / TEXT("Resources"));
 
 	Style->Set("GoogleTestForUE.RunGoogleTest", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
 
