@@ -16,7 +16,7 @@ namespace testing
 }
 
 
-class FGoogleTestForUEModule : public IModuleInterface
+class FGoogleTestForUnrealModule : public IModuleInterface
 {
 public:
 	/** IModuleInterface implementation */

@@ -3,9 +3,9 @@ using System.IO;
 using UnrealBuildTool;
 
 
-public class GoogleTestForUE : ModuleRules
+public class GoogleTestForUnreal : ModuleRules
 {
-	public GoogleTestForUE(ReadOnlyTargetRules Target) : base(Target)
+	public GoogleTestForUnreal(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 

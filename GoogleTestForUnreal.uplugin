@@ -15,7 +15,7 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "GoogleTestForUE",
+			"Name": "GoogleTestForUnreal",
 			"Type": "Developer",
 			"LoadingPhase": "PreDefault"
 		}
