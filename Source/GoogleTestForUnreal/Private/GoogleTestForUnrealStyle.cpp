@@ -1,15 +1,15 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
-#include "GoogleTestForUEStyle.h"
-#include "GoogleTestForUE.h"
+#include "GoogleTestForUnrealStyle.h"
+#include "GoogleTestForUnrealModule.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Styling/SlateStyleRegistry.h"
 #include "SlateGameResources.h"
 #include "IPluginManager.h"
 
-TSharedPtr< FSlateStyleSet > FGoogleTestForUEStyle::StyleInstance = NULL;
+TSharedPtr< FSlateStyleSet > FGoogleTestForUnrealStyle::StyleInstance = NULL;
 
-void FGoogleTestForUEStyle::Initialize()
+void FGoogleTestForUnrealStyle::Initialize()
 {
 	if (!StyleInstance.IsValid())
 	{
@@ -18,16 +18,16 @@ void FGoogleTestForUEStyle::Initialize()
 	}
 }
 
-void FGoogleTestForUEStyle::Shutdown()
+void FGoogleTestForUnrealStyle::Shutdown()
 {
 	FSlateStyleRegistry::UnRegisterSlateStyle(*StyleInstance);
 	ensure(StyleInstance.IsUnique());
 	StyleInstance.Reset();
 }
 
-FName FGoogleTestForUEStyle::GetStyleSetName()
+FName FGoogleTestForUnrealStyle::GetStyleSetName()
 {
-	static FName StyleSetName(TEXT("GoogleTestForUEStyle"));
+	static FName StyleSetName(TEXT("GoogleTestForUnrealStyle"));
 	return StyleSetName;
 }
 
@@ -41,12 +41,12 @@ const FVector2D Icon16x16(16.0f, 16.0f);
 const FVector2D Icon20x20(20.0f, 20.0f);
 const FVector2D Icon40x40(40.0f, 40.0f);
 
-TSharedRef< FSlateStyleSet > FGoogleTestForUEStyle::Create()
+TSharedRef< FSlateStyleSet > FGoogleTestForUnrealStyle::Create()
 {
-	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("GoogleTestForUEStyle"));
-	Style->SetContentRoot(IPluginManager::Get().FindPlugin("GoogleTestForUE")->GetBaseDir() / TEXT("Resources"));
+	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("GoogleTestForUnrealStyle"));
+	Style->SetContentRoot(IPluginManager::Get().FindPlugin("GoogleTestForUnreal")->GetBaseDir() / TEXT("Resources"));
 
-	Style->Set("GoogleTestForUE.RunGoogleTest", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
+	Style->Set("GoogleTestForUnreal.RunGoogleTest", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
 
 	return Style;
 }
@@ -57,7 +57,7 @@ TSharedRef< FSlateStyleSet > FGoogleTestForUEStyle::Create()
 #undef TTF_FONT
 #undef OTF_FONT
 
-void FGoogleTestForUEStyle::ReloadTextures()
+void FGoogleTestForUnrealStyle::ReloadTextures()
 {
 	if (FSlateApplication::IsInitialized())
 	{
@@ -65,7 +65,7 @@ void FGoogleTestForUEStyle::ReloadTextures()
 	}
 }
 
-const ISlateStyle& FGoogleTestForUEStyle::Get()
+const ISlateStyle& FGoogleTestForUnrealStyle::Get()
 {
 	return *StyleInstance;
 }

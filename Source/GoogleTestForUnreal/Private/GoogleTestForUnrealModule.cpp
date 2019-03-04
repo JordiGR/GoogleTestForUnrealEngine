@@ -1,6 +1,6 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
-#include "GoogleTestForUE.h"
+#include "GoogleTestForUnrealModule.h"
 
 #include <memory>
 
@@ -21,22 +21,22 @@
 #include <Framework/Commands/Commands.h>
 #include <LevelEditor.h>
 #include "GUIUtilities.h"
-#include "GoogleTestForUEStyle.h"
+#include "GoogleTestForUnrealStyle.h"
 #include "GoogleTestOutputLogRedirector.h"
 
 
-#define LOCTEXT_NAMESPACE "FGoogleTestForUEModule"
+#define LOCTEXT_NAMESPACE "FGoogleTestForUnrealModule"
 
 
 namespace
 {
-	class FGoogleTestForUECommands : public TCommands<FGoogleTestForUECommands>
+	class FGoogleTestForUnrealCommands : public TCommands<FGoogleTestForUnrealCommands>
 	{
 	public:
-		FGoogleTestForUECommands()
-			: TCommands<FGoogleTestForUECommands>(
-				TEXT("GoogleTestForUE"), NSLOCTEXT("Contexts", "GoogleTestForUE", "GoogleTestForUE Plugin"), NAME_None,
-				FGoogleTestForUEStyle::GetStyleSetName())
+		FGoogleTestForUnrealCommands()
+			: TCommands<FGoogleTestForUnrealCommands>(
+				TEXT("GoogleTestForUnreal"), NSLOCTEXT("Contexts", "GoogleTestForUnreal", "GoogleTestForUnreal Plugin"), NAME_None,
+				FGoogleTestForUnrealStyle::GetStyleSetName())
 		{}
 
 		// TCommands<> interface
@@ -52,43 +52,43 @@ namespace
 		TSharedPtr<FUICommandInfo> RunGoogleTest;
 	};
 
-	const FName kGoogleTestForUEToolbarTabName("GoogleTestForUEToolbar");
-	const FName kGoogleTestForUEMenuName("GoogleTestForUEMenu");
+	const FName kGoogleTestForUnrealToolbarTabName("GoogleTestForUnrealToolbar");
+	const FName kGoogleTestForUnrealMenuName("GoogleTestForUnrealMenu");
 
 	void RunGoogleTests();
 }
 
 
-void FGoogleTestForUEModule::StartupModule()
+void FGoogleTestForUnrealModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin
 	// file per-module
 	InitialiseGoogleTest();
 
-	FGoogleTestForUEStyle::Initialize();
-	FGoogleTestForUEStyle::ReloadTextures();
+	FGoogleTestForUnrealStyle::Initialize();
+	FGoogleTestForUnrealStyle::ReloadTextures();
 
-	FGoogleTestForUECommands::Register();
+	FGoogleTestForUnrealCommands::Register();
 
-	auto commandInfo = FGoogleTestForUECommands::Get().GetCommandInfo();
+	auto commandInfo = FGoogleTestForUnrealCommands::Get().GetCommandInfo();
 	auto command = CreateCommand(commandInfo, []() { RunGoogleTests(); });
 	auto& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
-	AddMenuCommand(levelEditorModule, command, commandInfo, kGoogleTestForUEMenuName, "WindowLayout");
-	AddToolbarButton(levelEditorModule, command, commandInfo, kGoogleTestForUEToolbarTabName, "Game");
+	AddMenuCommand(levelEditorModule, command, commandInfo, kGoogleTestForUnrealMenuName, "WindowLayout");
+	AddToolbarButton(levelEditorModule, command, commandInfo, kGoogleTestForUnrealToolbarTabName, "Game");
 }
 
-void FGoogleTestForUEModule::ShutdownModule()
+void FGoogleTestForUnrealModule::ShutdownModule()
 {
 	// This function may be called during shutdown to clean up your module.
 	// For modules that support dynamic reloading, we call this function before unloading the module.
 
-	FGoogleTestForUEStyle::Shutdown();
+	FGoogleTestForUnrealStyle::Shutdown();
 
-	FGoogleTestForUECommands::Unregister();
+	FGoogleTestForUnrealCommands::Unregister();
 }
 
-void FGoogleTestForUEModule::InitialiseGoogleTest()
+void FGoogleTestForUnrealModule::InitialiseGoogleTest()
 {
 	using StringPtr = char*;
 	auto argc = 1;
@@ -104,7 +104,7 @@ void FGoogleTestForUEModule::InitialiseGoogleTest()
 	RedirectGoogleTestOutput();
 }
 
-void FGoogleTestForUEModule::RedirectGoogleTestOutput()
+void FGoogleTestForUnrealModule::RedirectGoogleTestOutput()
 {
 	if (m_GoogleTestEventListener == nullptr)
 	{
@@ -118,7 +118,7 @@ void FGoogleTestForUEModule::RedirectGoogleTestOutput()
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FGoogleTestForUEModule, GoogleTestForUE)
+IMPLEMENT_MODULE(FGoogleTestForUnrealModule, GoogleTestForUnreal)
 
 
 namespace
