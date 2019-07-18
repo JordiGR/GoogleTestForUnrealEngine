@@ -16,7 +16,7 @@
 	"Modules": [
 		{
 			"Name": "GoogleTestForUnreal",
-			"Type": "Developer",
+			"Type": "Editor",
 			"LoadingPhase": "PreDefault"
 		}
 	]
