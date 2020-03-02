@@ -1,8 +1,8 @@
 #include "GUIUtilities.h"
 
-#include <UICommandList.h>
+#include <Framework/Commands/UICommandList.h>
 #include <Framework/MultiBox/MultiBoxBuilder.h>
-#include <AssetEditorToolkit.h>
+#include <Toolkits/AssetEditorToolkit.h>
 
 
 TSharedPtr<FUICommandList> CreateCommand(TSharedPtr<FUICommandInfo> commandInfo, std::function<void()> callback)
