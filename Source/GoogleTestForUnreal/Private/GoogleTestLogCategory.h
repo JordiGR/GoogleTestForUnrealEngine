@@ -1,6 +1,6 @@
 #pragma once
 
-#include <LogMacros.h>
+#include <Logging/LogMacros.h>
 
 
 #define GOOGLE_TEST_LOG_VERBOSITY Log

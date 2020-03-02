@@ -2,7 +2,7 @@
 
 
 #include <functional>
-#include <MultiBoxExtender.h>
+#include <Framework/Multibox/MultiBoxExtender.h>
 
 
 class IHasMenuExtensibility;
